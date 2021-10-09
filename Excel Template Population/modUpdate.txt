@@ -1,0 +1,79 @@
+Attribute VB_Name = "modUpdate"
+
+'---------------------------------------------------------------------------------------------------------------
+'Initiated by clicking "Populate Template" Button on the data tab.
+' Purpose: Iterates over the data table and populates the template file with the appropriate information.
+'       Automating this process alleivates the need for manual entry of all data and elimiates data entry errors.
+'---------------------------------------------------------------------------------------------------------------
+Private Sub UpdateTemplate()
+Dim count As Integer
+Dim objList As ListObject
+Dim objRow As ListRow
+Dim colNum As Integer
+Dim colCount As Integer
+Dim value As String
+Dim suffix As Integer
+
+Application.ScreenUpdating = False
+
+'Set to Excel Data Table on the Data tab (active sheet wehre Populate Template is located)
+Set objList = ActiveSheet.ListObjects("tblData")
+
+'Accumulator to track how many records have been added.
+'   Used for logic of when to create a new sheet (after 36 records entered)
+count = 0
+suffix = 1
+
+Worksheets("Template-1").Activate
+'Starting cell Item# 1 ID field
+Range("B12").Activate
+
+colCount = objList.ListColumns.count
+
+'Iterate over tblData
+For Each objRow In objList.ListRows
+    For colNum = 1 To colCount
+        If colNum = 3 And colCount = 8 Then 'No End Date in data table moves from Start Time to Requested #1
+            ActiveCell = objRow.Range(colNum).value
+            ActiveCell.Offset(0, 4).Activate
+        ElseIf colNum = 5 And colCount = 10 Then 'End Date provided in data table moves from End Time to Requested #1
+            ActiveCell = objRow.Range(colNum).value
+            ActiveCell.Offset(0, 2).Activate
+        Else
+            ActiveCell = objRow.Range(colNum).value
+            ActiveCell.Offset(0, 1).Activate
+        End If
+        
+    Next colNum
+    
+    count = count + 1 'Iterate record count
+    ActiveCell.Offset(1, -11).Activate 'Move Active cell down a row and to the left 11 columns (B)
+    
+    'The template can contain a maximum of 36 records if this is reach a new tab must be created
+    If count Mod 36 = 0 Then
+        'Increments suffix for name of new tabl
+        suffix = suffix + 1
+        'Copys and creates new tab and plates it after the current
+        Worksheets("Template-1").Copy after:=Worksheets("Template-" & suffix - 1)
+        
+        'Sets the tab name, clears the cells and activates the starting cell
+        ActiveSheet.Name = "Template-" & suffix
+        Range("B12:S47") = ""
+        Range("B12").Activate
+    End If
+    
+Next objRow
+
+Application.ScreenUpdating = True
+
+
+End Sub
+
+'---------------------------------------------------------------------------------------------------------------
+'Initiated by clicking "Run Table Update" Button on the data tab.
+' Purpose: Refreshes all data queries and provides a more user friendly option to Refresh the data while also
+'       allowing the workbook to be opened with out automatically refreshing (requested)
+'---------------------------------------------------------------------------------------------------------------
+Private Sub RefreshData()
+ThisWorkbook.RefreshAll
+End Sub

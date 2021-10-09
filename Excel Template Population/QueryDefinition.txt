@@ -1,0 +1,19 @@
+let
+    Source = Excel.Workbook(File.Contents("FULL PATH TO SOURCE DATA"), null, true),
+    tblData_Sheet = Source{[Item="tblData",Kind="Sheet"]}[Data],
+    promoteHeaders = Table.PromoteHeaders(tblData_Sheet, [PromoteAllScalars=true]),
+    updateDataType = Table.TransformColumnTypes(promoteHeaders,{{"Time", type time}}),
+    removeNullColumns = Table.RemoveColumns(updateDataType,{"Column6"}),
+    pivotData = Table.Pivot(removeNullColumns, List.Distinct(removeNullColumns[Requested]), "Requested", "Code"),
+    conditionalRqt1 = Table.AddColumn(pivotData, "Rqt1", each if [#"Requested #1"] <> null then "X" else null),
+    removeRequested1 = Table.RemoveColumns(conditionalRqt1,{"Requested #1"}),
+    conditionalRqt2 = Table.AddColumn(removeRequested1, "Rqt2", each if [#"Requested #2"] <> null then "X" else null),
+    removeRequested2 = Table.RemoveColumns(conditionalRqt2,{"Requested #2"}),
+    conditionalRqt3 = Table.AddColumn(removeRequested2, "Rqt3", each if [#"Requested #3"] <> null then "X" else null),
+    removeRequested3 = Table.RemoveColumns(conditionalRqt3,{"Requested #3"}),
+    conditionalRqt4 = Table.AddColumn(removeRequested3, "Rqt4", each if [#"Requested #4"] <> null then "X" else null),
+    removeRequested4 = Table.RemoveColumns(conditionalRqt4,{"Requested #4"}),
+    conditionalRqt5 = Table.AddColumn(removeRequested4, "Rqt5", each if [#"Requested #5"] <> null then "X" else null),
+    removeRequested5 = Table.RemoveColumns(conditionalRqt5,{"Requested #5"})
+in
+    removeRequested5
