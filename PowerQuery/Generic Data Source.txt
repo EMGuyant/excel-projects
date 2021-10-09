@@ -1,0 +1,10 @@
+let
+    dataExport = "DataExport.xlsx",
+    currentPath = Excel.CurrentWorkbook(){[Name="filepath"]}[Content]{0}[Column1],
+    path = Text.Split(currentPath, "["){0},
+    sourcePath = path & dataExport,
+    Source = Excel.Workbook(File.Contents(sourcePath), true),
+    sheetName = Source[Name]{0},
+    GenericQuery_Sheet = Source{[Item=sheetName, Kind="Sheet"]}[Data]
+in
+    GenericQuery_Sheet
